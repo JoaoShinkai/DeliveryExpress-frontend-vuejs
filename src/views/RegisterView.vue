@@ -16,10 +16,10 @@
                     <v-text-field label="Email" :error-messages="error.email" v-model="form.email" outlined></v-text-field>
                     <v-row>
                         <v-col cols="12" sm="6">
-                            <v-text-field label="Senha" :error-messages="error.password" v-model="form.password" outlined></v-text-field>
+                            <v-text-field type="password" label="Senha" :error-messages="error.password" v-model="form.password" outlined></v-text-field>
                         </v-col>
                         <v-col cols="12" sm="6">
-                            <v-text-field label="Confirmar Senha" :error-messages="error.confirmPassword" v-model="form.confirmPassword" outlined></v-text-field>
+                            <v-text-field type="password" label="Confirmar Senha" :error-messages="error.confirmPassword" v-model="form.confirmPassword" outlined></v-text-field>
                         </v-col>
                     </v-row>
                     <v-btn type="submit" depressed color="primary">
@@ -91,6 +91,8 @@ export default {
             if(this.isValidData){
                 try{
                     await axios.post(`http://localhost:3000/users`, this.form);
+
+                    this.$router.push({name: 'login'});
                 }catch(err){
                     console.log(err);
                 }
