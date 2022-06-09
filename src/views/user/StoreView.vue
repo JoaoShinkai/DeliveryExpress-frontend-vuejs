@@ -1,10 +1,29 @@
 <template>
     <div class="user-store">
-        
+        <nav-bar />
         <div class="user-store-container">
             <div class="user-store-container-header">
+                    <v-dialog v-model="dialog" max-width="600px">
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-btn id="teste" style="display: none" color="primary" dark v-bind="attrs" v-on="on">
+                                Open Dialog
+                            </v-btn>
+                        </template>
+                        <v-card>
+                            <v-card-title>
+                                <span class="text-h5">{{this.modalInfo.productName}}</span>
+                            </v-card-title>
+                            <v-card-text>
+                            </v-card-text>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn color="blue darken-1" text @click="dialog = false">Close</v-btn>
+                                <v-btn color="blue darken-1" text @click="dialog = false">Save</v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
                 <div class="user-store-container-header-logo shadow-effect">
-                    <img src="https://img.freepik.com/vetores-gratis/modelo-de-design-de-logotipo-de-restaurante_79169-56.jpg?w=2000" alt="">
+                    <img :src="this.store.image" alt="">
                 </div>
                 <div class="user-store-container-header-info shadow-effect">
                     <div class="user-store-container-header-info-title">{{this.store.name}}</div>
@@ -35,7 +54,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="JS-product-table-tbody">
-                                    <tr v-for="product in category.products" :key="product.id" class="JS-product-table-tbody-tr">
+                                    <tr @click="modal(product.id)" v-for="product in category.products" :key="product.id" class="JS-product-table-tbody-tr">
                                         <td class="JS-product-table-tbody-td-left"> 
                                             <div class="user-table-value">
                                                 <div class="user-table-title">{{product.name}}</div> 
@@ -56,6 +75,8 @@
     </div>
 </template>
 <script>
+// import ModalAddToCart from '../../components/user/ModalAddToCart.vue'
+import NavBar from '../../components/user/NavBar.vue'
 import axios from 'axios';
 
 export default{
@@ -64,7 +85,12 @@ export default{
             model: 'category',
             store: {},
             categories: [],
-            token: localStorage.getItem('token')
+            dialog: false,
+            token: localStorage.getItem('token'),
+            modalInfo: {
+                productId: '',
+                productName: ''
+            }
         }
     },
     methods: {
@@ -91,11 +117,26 @@ export default{
             else{
                 this.$router.push({name: 'user-home'});
             }
+        },
+        async modal(id){
+            try{
+                const product = await axios.get(`http://localhost:3000/product/${id}`);
+                this.modalInfo.productId = product.data.id;
+                this.modalInfo.productName = product.data.name;
+                this.dialog = true;
+            }catch(err){
+                console.log(err);
+            }
+            
         }
     },
     created: async function(){
         await this.loadStore();
         console.log(this.categories);
+    },
+    components: {
+        NavBar
+        // ModalAddToCart
     }
 }
 </script>
@@ -104,12 +145,12 @@ export default{
     box-shadow: 0 0 4px 0 #e1e1e1;
 }
 .user-store{
-    padding: 30px 0;
     background-color: #f2f2f2;
     min-height: 100vh;
 }
 .user-store-container{
-    padding: 15px 15%;
+    padding: 45px 15%;
+    padding-left: calc(15% + 60px);
 }
 .user-store-container-header{
     display: flex;

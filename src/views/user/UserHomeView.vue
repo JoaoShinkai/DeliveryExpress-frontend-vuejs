@@ -1,5 +1,6 @@
 <template>
     <div class="user-home">
+        <nav-bar />
         <div class="user-home-container">
             <div class="user-home-container-categories">
                 <div>
@@ -24,7 +25,7 @@
             </div>
             <div class="user-home-container-stores">
                 <div v-for="(store) in stores" :key="store.id">
-                    <card-store :id="store.id" :name="store.name" :delivery="store.delivery" :status="store.status" />
+                    <card-store :id="store.id" :name="store.name" :delivery="store.delivery" :status="store.status" :image="store.image" />
                 </div>
                 
                 
@@ -35,6 +36,7 @@
 
 <script>
 
+import NavBar from '../../components/user/NavBar.vue'
 import CardStore from '../../components/user/CardStore.vue';
 import axios from 'axios';
 
@@ -46,7 +48,8 @@ export default {
         }
     },
     components: {
-        CardStore
+        CardStore,
+        NavBar
     },
     methods: {
         async loadStores(){
@@ -70,10 +73,9 @@ export default {
 .user-home{
     background-color: #f2f2f2;
     min-height: 100vh;
-    padding: 30px 0;
 }
 .user-home-container{
-    padding: 15px 15%;
+    padding: 45px 15%;
 }
 .user-home-container-stores{
     display: flex;

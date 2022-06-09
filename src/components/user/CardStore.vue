@@ -2,7 +2,7 @@
     <router-link :to="{name: 'store', params: {id: this.id}}" style="text-decoration: none; color: #2b2b2b">
         <div class="store-card">
             <div class="store-card-logo">
-                <img src="https://img.freepik.com/vetores-gratis/modelo-de-design-de-logotipo-de-restaurante_79169-56.jpg?w=2000" alt="">
+                <img :src="image" alt="">
             </div>
             <div class="store-card-body">
                 <div class="store-card-body-title">{{ name }}</div>
@@ -28,6 +28,7 @@ export default {
     },
     props: {
         id: Number,
+        image: String,
         name: String,
         delivery: String,
         status: Number
