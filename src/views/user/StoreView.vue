@@ -4,17 +4,50 @@
         <div class="user-store-container">
             <div class="user-store-container-header">
                     <v-dialog v-model="dialog" max-width="600px">
-                        <template v-slot:activator="{ on, attrs }">
-                            <v-btn id="teste" style="display: none" color="primary" dark v-bind="attrs" v-on="on">
-                                Open Dialog
-                            </v-btn>
-                        </template>
                         <v-card>
                             <v-card-title>
-                                <span class="text-h5">{{this.modalInfo.productName}}</span>
+                                <span class="text-h5">Adicionar ao carrinho</span>
                             </v-card-title>
                             <v-card-text>
+                                <hr>
+                                <div class="user-table-value JS-product-addToCard-product">
+                                    <div class="user-table-title">{{this.modalInfo.productName}}</div> 
+                                    <div class="user-table-subtitle">{{this.modalInfo.productDescription}}</div>
+                                </div>
+                                <hr>
+                                <div class="form-group">
+                                    <div v-for="additional in modalInfo.additionals" :key="additional.id" class="JS-product-addToCard-additional">
+                                        <div class="JS-product-addToCard-additional-title">{{additional.name}}</div>
+                                        <div class="JS-product-addToCard-additional-body">
+                                            <v-radio-group style="margin-top: 0">
+                                                <div v-for="optionAdditional in additional.optionAdditionals" :key="optionAdditional.id" class="JS-product-addToCard-additional-body-item"> 
+                                                    <div class="JS-product-addToCard-additional-body-item-name">
+                                                        <v-radio :label="optionAdditional.name" :value="optionAdditional.id"></v-radio>
+                                                    </div>
+                                                    <div class="JS-product-addToCard-additional-body-item-price">
+                                                        + R$ {{optionAdditional.price}}
+                                                    </div>  
+                                                </div>
+                                            </v-radio-group>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <v-text-field label="Observação(opcional)" outlined clearable></v-text-field>
+                                </div>
+                                <div class="JS-product-addToCard-amount">
+                                    <div>Valor unitário: R$ <span class="JS-product-valorUnitario">{{this.modalInfo.productPrice}}</span></div>
+                                    <div class="JS-product-addToCard-amount-display">
+                                        <div class="JS-product-addToCard-amount-display-counter">
+                                            <div class="JS-product-addToCard-amount-display-counter-btn"> <button class="btnRemoveQuant" @click="removeQuant()" type="button" >-</button> </div>
+                                            <input type="number" name="txtQuant" class="JS-product-addToCard-amount-display-counter-value" :value="modalInfo.quant" readonly="true"> 
+                                            <div class="JS-product-addToCard-amount-display-counter-btn " > <button class="btnAddQuant" @click="addQuant()" type="button">+</button> </div>
+                                        </div>
+                                    </div>
+                                    <div>Valor Total: R$ <span class="JS-product-valorTotal">{{this.modalInfo.amountValue}}</span></div>
+                                </div>
+                                
                             </v-card-text>
+                            
                             <v-card-actions>
                                 <v-spacer></v-spacer>
                                 <v-btn color="blue darken-1" text @click="dialog = false">Close</v-btn>
@@ -75,7 +108,6 @@
     </div>
 </template>
 <script>
-// import ModalAddToCart from '../../components/user/ModalAddToCart.vue'
 import NavBar from '../../components/user/NavBar.vue'
 import axios from 'axios';
 
@@ -89,7 +121,12 @@ export default{
             token: localStorage.getItem('token'),
             modalInfo: {
                 productId: '',
-                productName: ''
+                productName: '',
+                productPrice: '',
+                productDescription: '',
+                quant: 1,
+                amountValue: '',
+                additionals: []
             }
         }
     },
@@ -123,20 +160,32 @@ export default{
                 const product = await axios.get(`http://localhost:3000/product/${id}`);
                 this.modalInfo.productId = product.data.id;
                 this.modalInfo.productName = product.data.name;
+                this.modalInfo.productDescription = product.data.description;
+                this.modalInfo.productPrice = product.data.price;
+                this.modalInfo.amountValue = product.data.price;
+                
+                const additionals = await axios.get(`http://localhost:3000/additional/product/${id}`);
+                this.modalInfo.additionals = additionals.data;
                 this.dialog = true;
             }catch(err){
                 console.log(err);
             }
             
+        },
+        addQuant(){
+            this.modalInfo.quant < 10 && this.modalInfo.quant++;
+            this.modalInfo.amountValue = (Number(this.modalInfo.productPrice) * Number(this.modalInfo.quant)).toFixed(2);
+        },
+        removeQuant(){
+            this.modalInfo.quant > 1 && this.modalInfo.quant--;
+            this.modalInfo.amountValue = (Number(this.modalInfo.productPrice) * Number(this.modalInfo.quant)).toFixed(2);
         }
     },
     created: async function(){
         await this.loadStore();
-        console.log(this.categories);
     },
     components: {
         NavBar
-        // ModalAddToCart
     }
 }
 </script>
@@ -227,9 +276,93 @@ export default{
 .user-table-title{
     color: #11101d;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 19px;
+}
+.user-table-subtitle{
+    font-size: 16px;
+    color: #11101d;
 }
 .user-table-value{
     padding: 0 8px;
+}
+
+/* MODAL */
+
+.JS-product-addToCard-product{
+    border-radius: 10px;
+    background-color: #e8e6e6;
+    padding: 14px !important;
+}
+.JS-product-addToCard-additional-body{
+    padding: 8px;
+}
+.JS-product-addToCard-additional-title{
+    border-radius: 10px;
+    background-color: #e8e6e6;
+    padding: 10px;
+    color: #11101d;
+    font-size: 16px;
+}
+.JS-product-addToCard-additional-body-item{
+    display: flex;
+    justify-content: space-between;
+}
+
+.JS-product-addToCard-additional-body-item-price{
+    color: green;
+    font-weight: bold;
+}
+hr{
+    margin: 1rem 0;
+    color: inherit;
+    background-color: currentColor;
+    border: 0;
+    opacity: .25;
+    height: 1px;
+}
+.JS-product-addToCard-amount{
+    text-align: center;
+    color: #11101d;
+    font-size: 16px;
+}
+.JS-product-addToCard-amount-display{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.JS-product-addToCard-amount-display-counter{
+    display: flex;
+}
+.JS-product-addToCard-amount-display-counter-value{
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background-color: #11101d;
+    color: white;
+    margin: 0 8px;
+    text-align: center;
+    border: none;
+}
+.JS-product-addToCard-amount-display-counter-value::-webkit-inner-spin-button{
+    all: unset;
+}
+.JS-product-addToCard-amount-display-counter-btn{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+}
+.JS-product-addToCard-amount-display-counter-btn button{
+    border: none;
+    background-color: #e1e1e1;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 </style>
