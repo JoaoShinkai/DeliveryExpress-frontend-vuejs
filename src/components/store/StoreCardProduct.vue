@@ -1,5 +1,5 @@
 <template>
-    <div  class=" JS-category-card">
+    <div class=" JS-category-card" @click="emitEvent()">
         <div class="JS-category-dots">
         <v-menu offset-y>
             <template v-slot:activator="{ on, attrs }">
@@ -50,6 +50,11 @@ export default {
         id: Number,
         name: String,
         icon: String
+    },
+    methods: {
+        emitEvent: function(){
+            this.$emit("emitCategory", this.id, this.name);
+        }
     }
 }
 </script>
@@ -68,7 +73,7 @@ export default {
     background-color: white;
     border-radius: 10px;
     width: 170px;
-    height: 200px;
+    min-height: 200px;
     display: flex;
     flex-direction: column;
     margin: 10px;
@@ -118,6 +123,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 10px 0;
 }
 .JS-category-card-title-text{
     border-radius: 20px;

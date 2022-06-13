@@ -22,6 +22,8 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@100;200;300;400;500;600&display=swap');
+
+
 #app{
   font-family: 'Barlow', sans-serif;
 }
