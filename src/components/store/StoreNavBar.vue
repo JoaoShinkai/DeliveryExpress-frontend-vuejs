@@ -1,59 +1,5 @@
 <template>
     <div>
-        <!-- <v-app-bar class="user-navbar" color="transparent" dark style="z-index: 100; box-shadow: none" >
-            <div class="d-flex align-center">
-                <v-app-bar-nav-icon v-if="active" style="color: white" @click.stop="active = !active"></v-app-bar-nav-icon>
-                <v-app-bar-nav-icon v-else style="color: #11101d" @click.stop="active = !active"></v-app-bar-nav-icon>
-            </div>
-        </v-app-bar> -->
-
-        <!-- ------------------------------------- MENU RETRÁTIL -------------------------------------------------------- --> 
-
-        <!-- <v-navigation-drawer
-        v-model="drawer"
-        fixed
-        bottom
-        style="padding-top: 70px"
-        class="user-navbar-drawer"
-        >
-        <v-list nav dense >
-            <v-list-item-group
-            v-model="group"
-            active-class="deep-purple--text text--accent-4"
-            >
-                <router-link to="/user-home" class="router-link">
-                    <v-list-item class="px-5 py-4 item-nav">
-                        <v-list-item-title>Inicio</v-list-item-title>
-                    </v-list-item>
-                </router-link>
-                <router-link to="/dashboard/products" class="router-link">
-                    <v-list-item class="px-5 py-4 item-nav">
-                        <v-list-item-title>Meus Produtos</v-list-item-title>
-                    </v-list-item>
-                </router-link>
-                
-                <router-link to="/dashboard/favorites" class="router-link">
-                    <v-list-item class="px-5 py-4 item-nav">
-                        <v-list-item-title>Favoritos</v-list-item-title>
-                    </v-list-item>
-                </router-link>
-
-                <v-list-item class="px-5 py-4 item-nav">
-                    <v-list-item-title>Configurações</v-list-item-title>
-                </v-list-item>
-
-                <router-link to="/dashboard/info" class="router-link">
-                    <v-list-item class="px-5 py-4 item-nav">
-                        <v-list-item-title>Meus Dados</v-list-item-title>
-                    </v-list-item>
-                </router-link>
-                <v-list-item class="px-5 py-4 item-nav">
-                    <v-list-item-title @click="logout()">Logout</v-list-item-title>
-                </v-list-item>
-            </v-list-item-group>
-        </v-list>
-        </v-navigation-drawer> -->
-
         <nav class="dashboard-nav"
             :class="{active}"
         >
@@ -65,43 +11,16 @@
                         </div>   
                     </li>
                     <li>
-                        <router-link to="/user-home" class="dashboard-nav-title router-link">
+                        <router-link to="/store/home" class="router-link">
                             <div class="dashboard-nav-icon"><i class="fas fa-home"></i></div>
-                            <div class="dashboard-nav-text navHidden" style="display: flex; justify-content: center;"> </div>
+                            <div class="dashboard-nav-text navHidden"> Início </div>
                         </router-link>
                     </li>
                     <li>
-                        <router-link to="teste" class="router-link">
+                        <router-link to="/store/products" class="router-link">
                             <div class="dashboard-nav-icon"><i class="fas fa-book-open"></i></div>
-                            <div class="dashboard-nav-text navHidden">Cardápio</div>
+                            <div class="dashboard-nav-text navHidden">Produtos</div>
                         </router-link>
-                    </li>
-                    <li>
-                        <router-link to="/user/bag" class="router-link">
-                            <div class="dashboard-nav-icon"><i class="fas fa-shopping-cart"></i></div>
-                            <div class="dashboard-nav-text navHidden">
-                                Carrinho
-                            </div>
-                            <div class="user-dashboard-cart-cont">0</div>
-                        </router-link>
-                    </li>
-                    <li>
-                        <a href="#" class="router-link">
-                            <div class="dashboard-nav-icon"><i class="fas fa-cogs"></i></div>
-                            <div class="dashboard-nav-text navHidden">Configurações</div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/user/orders" class="router-link">
-                            <div class="dashboard-nav-icon"><i class="fas fa-scroll"></i></div>
-                            <div class="dashboard-nav-text navHidden">Meus pedidos</div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/user/dashboard/address" class="router-link">
-                            <div class="dashboard-nav-icon"><i class="fas fa-map-marker-alt"></i></div>
-                            <div class="dashboard-nav-text navHidden">Endereços</div>
-                        </a>
                     </li>
                 </div>
                 <div class="dashboard-nav-divLogout">
@@ -125,10 +44,9 @@
 <script>
 
 export default{
-    name: 'UserNavbarComponent',
+    name: 'StoreNavbarComponent',
     data() {
         return {
-
             drawer: false,
             group: null,
             active: false
@@ -137,7 +55,7 @@ export default{
     methods: {
         logout(){
             localStorage.removeItem('token');
-            this.$router.push({name: 'login'});
+            this.$router.push({name: 'store-login'});
         }
     }
 }
