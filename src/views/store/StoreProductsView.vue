@@ -77,10 +77,12 @@
 
                 
             </div>
+            <!-- Exibição de categorias -->
             <div class="store-products-container-categories">
                 <store-card-product v-for="category in categories" :key="category.id" :id="category.id" :name="category.name" :icon="category.icon"  @emitCategory="loadProducts" />
             </div>
             <hr>
+
             <div v-if="this.dataTable.categorySelected" class="store-products-container-products">
                 <div class="store-products-container-products-header">
                     <modal-create-product :categoryId="dataTable.categorySelected" :categoryName="dataTable.categoryName" @productRegistered="loadProducts" />
@@ -101,19 +103,23 @@
                         hide-details
                     ></v-text-field>
                     </v-card-title>
+
+                    <!-- Tabela de visualização de produtos -->
                     <v-data-table :headers="dataTable.headers" :items="dataTable.values" :search="dataTable.search" class="body-1">
                         <template v-slot:[`item.available`]="{ item }">
                             <v-chip v-if="item.available == 1" class="ma-2" color="green" text-color="white">Ativo</v-chip>
                             <v-chip v-else class="ma-2" color="red" text-color="white">Inativo</v-chip>
                         </template>
                         <template v-slot:[`item.actions`]="{ item }">
-                            <v-icon
-                                small
-                                class="mr-2"
-                                @click="editItem(item)"
-                            >
-                                mdi-pencil
-                            </v-icon>
+                            
+                            <router-link :to="{name: 'store-edit-product', params: {id: item.id}}">
+                                <v-icon
+                                    small
+                                    class="mr-2"
+                                >
+                                    mdi-pencil
+                                </v-icon>
+                            </router-link>
                             <v-icon
                                 small
                                 @click="deleteItem(item)"
@@ -127,7 +133,7 @@
 
 
 
-
+            <!-- Modal de exclusão de produto -->
             <v-dialog v-model="dialogDelete" max-width="500px">
                 <v-card>
                     <v-card-title class="body-1">Deseja realmente deletar o produto <b style="margin-left: 5px"> {{modalDeleteProduct.name}}</b>?</v-card-title>
@@ -248,7 +254,12 @@ export default {
         },
         async deleteItemConfirm () {
             try{
-                await axios.delete(`http://localhost:3000/product/${this.modalDeleteProduct.id}`);
+                var req = {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`
+                    }
+                }
+                await axios.delete(`http://localhost:3000/product/${this.modalDeleteProduct.id}`, req);
                 this.loadProducts(this.dataTable.categorySelected, this.dataTable.categoryName);
                 this.dialogDelete = false;
             }catch(err){
