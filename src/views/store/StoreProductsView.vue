@@ -83,34 +83,7 @@
             <hr>
             <div v-if="this.dataTable.categorySelected" class="store-products-container-products">
                 <div class="store-products-container-products-header">
-                    <!-- Modal de criação de categoria -->
-                    <v-dialog v-model="modalAddProduct" max-width="480">
-                        <template v-slot:activator="{ on, attrs }">
-                            <v-btn v-bind="attrs" v-on="on"  depressed color="error">
-                                Novo ({{dataTable.categorySelected}})
-                            </v-btn>
-                        </template>
-                        <v-card>
-                            <v-card-title class="text-h5" style="padding: 22px 24px">Adicionar Produto</v-card-title>
-                            <v-card-text>
-                                <form action="">
-                                    <v-text-field label="Nome" outlined></v-text-field>
-                                    <div>
-                                        
-                                    </div>
-                                </form>
-                            </v-card-text>
-                            <v-card-actions>
-                                <v-spacer></v-spacer>
-                                <v-btn color="green darken-1" text @click="modalAddProduct = false">
-                                    Fechar
-                                </v-btn>
-                                <v-btn color="green darken-1" text>
-                                    Cadastrar
-                                </v-btn>
-                            </v-card-actions>
-                        </v-card>
-                    </v-dialog>
+                    <modal-create-product :categoryId="dataTable.categorySelected" :categoryName="dataTable.categoryName" @productRegistered="loadProducts" />
                 </div>
                 <br>
                 <v-card>
@@ -123,21 +96,52 @@
                     <v-text-field
                         v-model="dataTable.search"
                         append-icon="mdi-magnify"
-                        label="Search"
+                        label="Procurar"
                         single-line
                         hide-details
                     ></v-text-field>
                     </v-card-title>
-                    <v-data-table
-                    :headers="dataTable.headers"
-                    :items="dataTable.values"
-                    :search="dataTable.search"
-                     class="body-1"
-                    >
+                    <v-data-table :headers="dataTable.headers" :items="dataTable.values" :search="dataTable.search" class="body-1">
+                        <template v-slot:[`item.available`]="{ item }">
+                            <v-chip v-if="item.available == 1" class="ma-2" color="green" text-color="white">Ativo</v-chip>
+                            <v-chip v-else class="ma-2" color="red" text-color="white">Inativo</v-chip>
+                        </template>
+                        <template v-slot:[`item.actions`]="{ item }">
+                            <v-icon
+                                small
+                                class="mr-2"
+                                @click="editItem(item)"
+                            >
+                                mdi-pencil
+                            </v-icon>
+                            <v-icon
+                                small
+                                @click="deleteItem(item)"
+                            >
+                                mdi-delete
+                            </v-icon>
+                        </template>
                     </v-data-table>
                 </v-card>
             </div>
-            
+
+
+
+
+            <v-dialog v-model="dialogDelete" max-width="500px">
+                <v-card>
+                    <v-card-title class="body-1">Deseja realmente deletar o produto <b style="margin-left: 5px"> {{modalDeleteProduct.name}}</b>?</v-card-title>
+                    <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="dialogDelete = false" >Cancel</v-btn>
+                    <v-btn color="blue darken-1" text @click="deleteItemConfirm()" >OK</v-btn>
+                    <v-spacer></v-spacer>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+
+
+
         </div>
     </div>
 </template>
@@ -145,13 +149,14 @@
 <script>
 import StoreNavbar from '../../components/store/StoreNavBar.vue'
 import StoreCardProduct from '../../components/store/StoreCardProduct.vue'
+import ModalCreateProduct from '../../components/store/ModalCreateProduct.vue'
 import axios from 'axios';
 import jwt_decode from 'jwt-decode';
 export default {
     data() {
         return {
+            dialogDelete: false,
             dialog: false,
-            modalAddProduct: false,
             token: localStorage.getItem('token'),
             categories: [],
             modalCreateCategory: {
@@ -166,17 +171,23 @@ export default {
                     { text: 'Nome', value: 'name' },
                     { text: 'Descrição', sortable: false, value: 'description' },
                     { text: 'Preço', value: 'price' },
-                    { text: 'Status', value: 'available' }
+                    { text: 'Status', value: 'available' },
+                    { text: 'Actions', value: 'actions', sortable: false }
                 ],
                 values: [
                     
                 ],
+            },
+            modalDeleteProduct: {
+                name: '',
+                id: ''
             }
         }
     },
     components: {
         StoreNavbar,
-        StoreCardProduct
+        StoreCardProduct,
+        ModalCreateProduct
     },
     methods: {
         async loadCategories() {
@@ -229,7 +240,21 @@ export default {
             }catch(err){
                 console.log(err);
             }
-        }
+        },
+
+        deleteItem (item) {
+            this.modalDeleteProduct = item,
+            this.dialogDelete = true
+        },
+        async deleteItemConfirm () {
+            try{
+                await axios.delete(`http://localhost:3000/product/${this.modalDeleteProduct.id}`);
+                this.loadProducts(this.dataTable.categorySelected, this.dataTable.categoryName);
+                this.dialogDelete = false;
+            }catch(err){
+                console.log(err);
+            }
+        },
     },
     created: async function(){
         await this.loadCategories();
@@ -253,7 +278,7 @@ hr{
 }
 .store-products-container{
     margin-left: 60px;
-    padding: 45px 15%;
+    padding: 45px 12%;
 }
 .store-products-container-categories{
     display: flex;
