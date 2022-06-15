@@ -3,6 +3,7 @@
         <nav-bar />
         <div class="user-store-container">
             <div class="user-store-container-header">
+                <!-- Modal adicionar produto ao carrinho -->
                     <v-dialog v-model="dialog" max-width="600px">
                         <v-card>
                             <v-card-title>
@@ -15,27 +16,29 @@
                                     <div class="user-table-subtitle">{{this.modalInfo.productDescription}}</div>
                                 </div>
                                 <hr>
-                                <div class="form-group">
-                                    <div v-for="additional in modalInfo.additionals" :key="additional.id" class="JS-product-addToCard-additional">
-                                        <div class="JS-product-addToCard-additional-title">{{additional.name}}</div>
-                                        <div class="JS-product-addToCard-additional-body">
-                                            <v-radio-group style="margin-top: 0">
-                                                <div v-for="optionAdditional in additional.optionAdditionals" :key="optionAdditional.id" class="JS-product-addToCard-additional-body-item"> 
-                                                    <div class="JS-product-addToCard-additional-body-item-name">
-                                                        <v-radio :label="optionAdditional.name" :value="optionAdditional.id"></v-radio>
+                                <div class="form-group" id="radioGroupOptionAdditionals">
+                                    <div v-if="modalInfo.additionals.length > 0">
+                                        <div v-for="additional in modalInfo.additionals" :key="additional.id" class="JS-product-addToCard-additional">
+                                            <div class="JS-product-addToCard-additional-title">{{additional.name}}</div>
+                                            <div class="JS-product-addToCard-additional-body">
+                                                <v-radio-group style="margin-top: 0" >
+                                                    <div v-for="optionAdditional in additional.optionAdditionals" :key="optionAdditional.id" class="JS-product-addToCard-additional-body-item"> 
+                                                        <div class="JS-product-addToCard-additional-body-item-name">
+                                                            <v-radio @change="radioOptionIsClicked()" :label="optionAdditional.name" :value="optionAdditional.id"></v-radio>
+                                                        </div>
+                                                        <div class="JS-product-addToCard-additional-body-item-price">
+                                                            + R$ {{optionAdditional.price}}
+                                                        </div>  
                                                     </div>
-                                                    <div class="JS-product-addToCard-additional-body-item-price">
-                                                        + R$ {{optionAdditional.price}}
-                                                    </div>  
-                                                </div>
-                                            </v-radio-group>
+                                                </v-radio-group>
+                                            </div>
                                         </div>
+                                        <hr>
                                     </div>
-                                    <hr>
                                     <v-text-field label="Observação(opcional)" outlined clearable></v-text-field>
                                 </div>
                                 <div class="JS-product-addToCard-amount">
-                                    <div>Valor unitário: R$ <span class="JS-product-valorUnitario">{{this.modalInfo.productPrice}}</span></div>
+                                    <div>Valor unitário: R$ <span class="JS-product-valorUnitario">{{this.modalInfo.unityProductPrice}}</span></div>
                                     <div class="JS-product-addToCard-amount-display">
                                         <div class="JS-product-addToCard-amount-display-counter">
                                             <div class="JS-product-addToCard-amount-display-counter-btn"> <button class="btnRemoveQuant" @click="removeQuant()" type="button" >-</button> </div>
@@ -123,6 +126,7 @@ export default{
                 productId: '',
                 productName: '',
                 productPrice: '',
+                unityProductPrice: '',
                 productDescription: '',
                 quant: 1,
                 amountValue: '',
@@ -162,7 +166,9 @@ export default{
                 this.modalInfo.productName = product.data.name;
                 this.modalInfo.productDescription = product.data.description;
                 this.modalInfo.productPrice = product.data.price;
+                this.modalInfo.unityProductPrice = product.data.price;
                 this.modalInfo.amountValue = product.data.price;
+                this.modalInfo.quant = 1;
                 
                 const additionals = await axios.get(`http://localhost:3000/additional/product/${id}`);
                 this.modalInfo.additionals = additionals.data;
@@ -174,12 +180,41 @@ export default{
         },
         addQuant(){
             this.modalInfo.quant < 10 && this.modalInfo.quant++;
-            this.modalInfo.amountValue = (Number(this.modalInfo.productPrice) * Number(this.modalInfo.quant)).toFixed(2);
+            this.calcAmountValue();
         },
         removeQuant(){
             this.modalInfo.quant > 1 && this.modalInfo.quant--;
-            this.modalInfo.amountValue = (Number(this.modalInfo.productPrice) * Number(this.modalInfo.quant)).toFixed(2);
-        }
+            this.calcAmountValue();
+        },
+        radioOptionIsClicked(){
+            setTimeout(() => {
+                this.calcAmountValue();
+            }, 100);
+            
+        },
+        async calcAmountValue(){
+            // Salva na variável todos os inputs selecionados
+            var inputsCheckeds = document.getElementById('radioGroupOptionAdditionals').querySelectorAll('input[type="radio"]:checked');
+            var options = [];
+            var additionalsValue = 0;
+            
+            // Percorre a array de inputs selecionados, salva os dados na array options em formato JSON e atribui o valor dos adicionais em "additionalsValue"
+            for(const input of inputsCheckeds){
+                const res = await axios.get(`http://localhost:3000/optionAdditional/${input.value}`);
+                options.push({id: res.data.id, price: res.data.price});
+                additionalsValue += Number(res.data.price);
+            }
+
+            // Salva os dados do Preço, dos Adicionais e a Quantidade nas variáveis
+            const price = Number(this.modalInfo.productPrice);
+            const additionalsPrice = additionalsValue;
+            const quant = Number(this.modalInfo.quant);
+
+            // Altera o valor total do modal
+            this.modalInfo.unityProductPrice = (price + additionalsPrice).toFixed(2);
+            this.modalInfo.amountValue = ((price + additionalsPrice) * quant).toFixed(2);
+        },
+        
     },
     created: async function(){
         await this.loadStore();
@@ -190,6 +225,7 @@ export default{
 }
 </script>
 <style scoped>
+
 .shadow-effect{
     box-shadow: 0 0 4px 0 #e1e1e1;
 }
