@@ -13,11 +13,9 @@
                     </v-btn>
             </template>
             <v-list>
-                <router-link to="/login" class="nav-link">
-                    <v-list-item class="nav-link-text">
-                        <v-list-item-title class="navbar-link-option"><i class="fa-solid fa-pen-ruler"></i> Editar</v-list-item-title>
-                    </v-list-item>
-                </router-link>
+                <v-list-item @click="() => this.modalEditCategory = true" class="nav-link-text">
+                    <v-list-item-title class="navbar-link-option"><i class="fa-solid fa-pen-ruler"></i> Editar</v-list-item-title>
+                </v-list-item>
                 <router-link to="/register" class="nav-link">
                     <v-list-item class="nav-link-text">
                         <v-list-item-title class="navbar-link-option"><i class="fa-solid fa-trash-can"></i> Excluir</v-list-item-title>
@@ -34,6 +32,8 @@
         <div class="JS-category-card-title">
             <div class="JS-category-card-title-text"> <span> {{name}} </span> </div>
         </div>
+
+        
     </div>
 </template>
 
@@ -43,7 +43,6 @@ export default {
     name: 'StoreCardProduct',
     data() {
         return {
-
         }
     },
     props: {

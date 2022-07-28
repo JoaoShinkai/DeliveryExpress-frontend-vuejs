@@ -5,7 +5,7 @@
             <form @submit.prevent="login()">
                 <v-card-text>
                     <v-text-field label="Email" v-model="form.email" outlined></v-text-field>
-                    <v-text-field label="Senha" v-model="form.password" outlined></v-text-field>
+                    <v-text-field label="Senha" type="password" v-model="form.password" outlined></v-text-field>
                     <div class="login-card-register-msg">Não possui uma conta? <router-link to="/register"> <a href="">Cadastre-se</a></router-link></div>
                     <br>
                     <v-btn type="submit" depressed color="primary">
