@@ -9,6 +9,7 @@ import StoreEditProduct from '../views/store/StoreEditProduct.vue'
 import StoreHomeView from '../views/store/StoreHomeView.vue'
 import StoreLoginView from '../views/store/StoreLoginView.vue'
 import StoreProductsView from '../views/store/StoreProductsView.vue'
+import CartView from '../views/user/CartView.vue'
 import StoreView from '../views/user/StoreView.vue'
 import UserHomeView from '../views/user/UserHomeView.vue'
 
@@ -87,6 +88,14 @@ const routes = [
     path: '/user/store/:id',
     name: 'store',
     component: StoreView,
+    beforeEnter: async(to, from, next) => {
+      await validateSession()? next() : next('/login')
+    }
+  },
+  {
+    path: '/user/cart',
+    name: 'user-cart',
+    component: CartView,
     beforeEnter: async(to, from, next) => {
       await validateSession()? next() : next('/login')
     }

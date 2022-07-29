@@ -35,7 +35,7 @@
                                         </div>
                                         <hr>
                                     </div>
-                                    <v-text-field label="Observação(opcional)" outlined clearable></v-text-field>
+                                    <v-text-field label="Observação(opcional)" v-model="modalInfo.observation" outlined clearable></v-text-field>
                                 </div>
                                 <div class="JS-product-addToCard-amount">
                                     <div>Valor unitário: R$ <span class="JS-product-valorUnitario">{{this.modalInfo.unityProductPrice}}</span></div>
@@ -54,7 +54,7 @@
                             <v-card-actions>
                                 <v-spacer></v-spacer>
                                 <v-btn color="blue darken-1" text @click="dialog = false">Close</v-btn>
-                                <v-btn color="blue darken-1" text @click="dialog = false">Save</v-btn>
+                                <v-btn color="blue darken-1" text @click="addToCart()">Save</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -108,11 +108,14 @@
                 </v-tabs-items>
             </div>
         </div>
+        <alert-component v-if="alert.isVisible" :message="alert.message" :status="alert.status" @closeAlert="alert.isVisible = false"/>
     </div>
 </template>
 <script>
 import NavBar from '../../components/user/NavBar.vue'
+import AlertComponent from '../../components/AlertComponent.vue'
 import axios from 'axios';
+import {baseURL} from '../../lib/api';
 
 export default{
     data(){
@@ -130,11 +133,25 @@ export default{
                 productDescription: '',
                 quant: 1,
                 amountValue: '',
+                observation: '',
                 additionals: []
+            },
+            alert: {
+                isVisible: false,
+                message: '',
+                status: 0
             }
         }
     },
     methods: {
+        showAlert(message, statusCode){
+            this.alert.message = message;
+            this.alert.status = statusCode,
+            this.alert.isVisible = true
+            setTimeout(() => {
+                this.alert.isVisible = false
+            },5300)
+        },
         async loadStore(){
             const id = this.$route.params.id;
 
@@ -148,7 +165,7 @@ export default{
                 }
             }
 
-            const res = await axios.get(`http://localhost:3000/store/${this.$route.params.id}`, req);
+            const res = await axios.get(`${baseURL}/store/${this.$route.params.id}`, req);
 
             if(res.data){
                 this.store = res.data
@@ -214,13 +231,72 @@ export default{
             this.modalInfo.unityProductPrice = (price + additionalsPrice).toFixed(2);
             this.modalInfo.amountValue = ((price + additionalsPrice) * quant).toFixed(2);
         },
+
+        async addToCart(){
+            // Salva na variável todos os inputs selecionados
+            var inputsCheckeds = document.getElementById('radioGroupOptionAdditionals').querySelectorAll('input[type="radio"]:checked');
+            var additionals = [];
+            
+            // Percorre a array de inputs selecionados, salva os dados na array options em formato JSON e atribui o valor dos adicionais em "additionalsValue"
+            for(const input of inputsCheckeds){
+                const res = await axios.get(`${baseURL}/optionAdditional/${input.value}`);
+                additionals.push(
+                    {
+                        name: res.data.name,
+                        price: res.data.price,
+                        optionAdditional: {
+                            id: res.data.id,
+                        }
+                    }
+                );
+            }
+
+            var item = {
+                product: {
+                    id: this.modalInfo.productId
+                },
+                quantity: this.modalInfo.quant,
+                unityPrice: this.modalInfo.unityProductPrice,
+                amount: this.modalInfo.amountValue,
+                observation: this.modalInfo.observation,
+                additionals: additionals
+            }
+
+            this.modalInfo.observation.length < 1 && delete item.observation;
+
+            try{
+                var req = {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`
+                    }
+                }
+                await axios.post(`${baseURL}/users/user-product`, item, req);
+                this.showAlert("Adicionado ao carrinho", 1)
+                this.cleanModalInfo();
+                this.dialog = false;
+            }catch(err){
+                console.log(err);
+            }
+        },
+        cleanModalInfo(){
+            this.modalInfo.productId = '',
+            this.modalInfo.productName = '',
+            this.modalInfo.productPrice = '',
+            this.modalInfo.unityProductPrice = '',
+            this.modalInfo.productDescription = '',
+            this.modalInfo.quant = 1,
+            this.modalInfo.amountValue = '',
+            this.modalInfo.observation = '',
+            this.modalInfo.additionals = []
+        }
         
     },
     created: async function(){
         await this.loadStore();
     },
     components: {
-        NavBar
+        NavBar,
+        AlertComponent
     }
 }
 </script>
