@@ -112,7 +112,7 @@
                         </template>
                         <template v-slot:[`item.actions`]="{ item }">
                             
-                            <router-link :to="{name: 'store-edit-product', params: {id: item.id}}">
+                            <router-link class="router-link" :to="{name: 'store-edit-product', params: {id: item.id}}">
                                 <v-icon
                                     small
                                     class="mr-2"
@@ -274,7 +274,9 @@ export default {
 </script>
 
 <style scoped>
-
+.router-link{
+    text-decoration: none;
+}
 hr{
     margin: 1rem 0;
     color: inherit;

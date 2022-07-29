@@ -77,7 +77,7 @@
                         </router-link>
                     </li>
                     <li>
-                        <router-link to="/user/bag" class="router-link">
+                        <router-link to="/user/cart" class="router-link">
                             <div class="dashboard-nav-icon"><i class="fas fa-shopping-cart"></i></div>
                             <div class="dashboard-nav-text navHidden">
                                 Carrinho
