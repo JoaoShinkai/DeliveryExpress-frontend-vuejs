@@ -270,7 +270,21 @@ export default{
                         Authorization: `Bearer ${this.token}`
                     }
                 }
-                await axios.post(`${baseURL}/users/user-product`, item, req);
+                
+                const productsInCart = await axios.get(`${baseURL}/userProduct`, req);
+
+                if(productsInCart.data.length > 0){
+                    let storeId = this.store.id;
+                    let id = productsInCart.data[0].product.category.store.id;
+
+                    if(storeId != id){
+                        let msgError = "Os produtos adicionados ao carrinho não podem ser de restaurantes distintos"
+                        this.showAlert(msgError, 0)
+                        throw new Error(msgError);
+                    }
+                }
+
+                await axios.post(`${baseURL}/userProduct`, item, req);
                 this.showAlert("Adicionado ao carrinho", 1)
                 this.cleanModalInfo();
                 this.dialog = false;

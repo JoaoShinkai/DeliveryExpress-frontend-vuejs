@@ -98,10 +98,10 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/user/dashboard/address" class="router-link">
+                        <router-link to="/user/address" class="router-link">
                             <div class="dashboard-nav-icon"><i class="fas fa-map-marker-alt"></i></div>
                             <div class="dashboard-nav-text navHidden">Endereços</div>
-                        </a>
+                        </router-link>
                     </li>
                 </div>
                 <div class="dashboard-nav-divLogout">
