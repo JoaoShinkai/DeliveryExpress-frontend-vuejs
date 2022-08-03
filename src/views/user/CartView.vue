@@ -49,7 +49,7 @@
                                     <td style="text-align: center;"> {{ product.quantity }}</td>
                                     <td style="text-align: center;">R$ {{ product.unityPrice }}</td>
                                     <td style="text-align: center;">R$ {{ product.amount }}</td>
-                                    <td class="d-flex justify-center"> <a class="btn btn-danger table-btn" data-bs-toggle="modal"><i class="fas fa-trash-alt"></i></a> </td>
+                                    <td class="d-flex justify-center"> <modal-delete-product :idProduct="product.id" :nameProduct="product.product.name"/> </td>
                                     <td> <button class="btn btn-warning table-btn"><i class="fas fa-pencil-alt table-btn-pencil"></i></button> </td>
                                 </tr>
                                 <tr class="JS-bag-table-additionalsRow" :key="'additionals'+product.id">
@@ -99,7 +99,7 @@
                         </div>
 
                         <div class="JS-stepper-buttons">
-                            <v-btn color="primary" @click="etapa = 3" :disabled="!this.address.id" >Continue</v-btn>
+                            <v-btn color="primary" @click="etapa = 3" :disabled="!this.address.id" >Próximo</v-btn>
                             <v-btn text @click="etapa = 1"> Voltar </v-btn>
                         </div>
 
@@ -131,7 +131,7 @@
                         </div>
 
                         <div class="JS-stepper-buttons">
-                            <v-btn color="primary" @click="etapa = 4" :disabled="!this.dataIsValid()" >Continue</v-btn>
+                            <v-btn color="primary" @click="etapa = 4" :disabled="!this.dataIsValid()" >Próximo</v-btn>
                             <v-btn text @click="etapa = 2"> Voltar </v-btn>
                         </div>
                         
@@ -176,6 +176,7 @@
 import NavBar from '../../components/user/NavBar.vue'
 import {baseURL} from '../../lib/api'
 import AlertComponent from '../../components/AlertComponent.vue'
+import ModalDeleteProduct from '../../components/user/cart/ModalDeleteProduct.vue'
 import axios from 'axios'
     export default {
         data() {
@@ -214,7 +215,8 @@ import axios from 'axios'
         },
         components: {
             NavBar,
-            AlertComponent
+            AlertComponent,
+            ModalDeleteProduct
         },
         methods: {
             async loadProducts(){
@@ -441,23 +443,7 @@ import axios from 'axios'
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
 }
-.table-btn{
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    border-radius: 50%;
-    background-color: #e8e6e6;
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.table-btn i{
-    color: #11101d;
-}
-.table-btn:hover i, .table-btn:focus i{ 
-    color: white;
-}
+
 .JS-stepper-buttons{
     display: flex;
     justify-content: end;
