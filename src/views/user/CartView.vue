@@ -28,9 +28,9 @@
                 </v-stepper-header>
                 <v-stepper-items class="py-14">
                     <v-stepper-content step="1">
-                        <div class="JS-bag-header">
+                        <!-- <div class="JS-bag-header">
                             <button><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
+                        </div> -->
                         <table class="JS-bag-table">
                             <thead>
                                 <tr>
@@ -43,13 +43,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <template v-for="product in products">
+                                <template v-for="product in order.products">
                                 <tr class="JS-bag-table-product" :key="'header'+product.id">
                                     <td>{{ product.product.name }}</td>
                                     <td style="text-align: center;"> {{ product.quantity }}</td>
                                     <td style="text-align: center;">R$ {{ product.unityPrice }}</td>
                                     <td style="text-align: center;">R$ {{ product.amount }}</td>
-                                    <td class="d-flex justify-center"> <a class="btn btn-danger table-btn" data-bs-toggle="modal"><i class="fas fa-trash-alt"></i></a> </td>
+                                    <td class="d-flex justify-center"> <modal-delete-product :idProduct="product.id" :nameProduct="product.product.name"/> </td>
                                     <td> <button class="btn btn-warning table-btn"><i class="fas fa-pencil-alt table-btn-pencil"></i></button> </td>
                                 </tr>
                                 <tr class="JS-bag-table-additionalsRow" :key="'additionals'+product.id">
@@ -62,19 +62,19 @@
                                 </template>
                                 <tr class="JS-bag-table-delivery" >
                                 <td colspan="3"><i class="fas fa-motorcycle"></i>Taxa de entrega</td>
-                                <td style="text-align: center;"> R$ {{this.calcTaxaEntrega()}}</td>
+                                <td style="text-align: center;"> R$ {{this.order.delivery}}</td>
                                 <td colspan="2"></td>
                                 </tr>
                                 <tr class="JS-bag-table-subtotal" >
                                 <td colspan="3"><b><i class="fas fa-coins"></i> Subtotal</b></td>
-                                <td style="text-align: center;"> <b>R$ {{ cartAmount }}</b> </td>
+                                <td style="text-align: center;"> <b>R$ {{ order.amount }}</b> </td>
                                 </tr>
                                 
                             </tbody>
                         </table>
 
                         <div class="JS-stepper-buttons">
-                            <v-btn color="primary" @click="etapa = 2" > Próximo </v-btn>
+                            <v-btn v-if="order.products.length > 0" color="primary" @click="etapa = 2" > Próximo </v-btn>
                         </div>
                         
                     </v-stepper-content>
@@ -93,14 +93,13 @@
                                 label="Endereço"
                                 placeholder="Select..."
                                 return-object
-                                @change="submit()"
                                 required
                             ></v-autocomplete>
                             </div>
                         </div>
 
                         <div class="JS-stepper-buttons">
-                            <v-btn color="primary" @click="etapa = 3" :disabled="!this.address.id" >Continue</v-btn>
+                            <v-btn color="primary" @click="etapa = 3" :disabled="!this.address.id" >Próximo</v-btn>
                             <v-btn text @click="etapa = 1"> Voltar </v-btn>
                         </div>
 
@@ -126,13 +125,13 @@
                                     <v-radio label="Não" :value="false"></v-radio>
                                 </v-radio-group>
                             </div>
-                            <div v-if="needChangeMoney">
-                                <v-text-field label="Troco para quanto?" outlined></v-text-field>
+                            <div v-if="needChangeMoney && order.paymentMethod == '1'">
+                                <v-text-field label="Troco para quanto?" v-model="order.changeMoney" outlined></v-text-field>
                             </div>
                         </div>
 
                         <div class="JS-stepper-buttons">
-                            <v-btn color="primary" @click="etapa = 4" :disabled="!this.address.id" >Continue</v-btn>
+                            <v-btn color="primary" @click="etapa = 4" :disabled="!this.dataIsValid()" >Próximo</v-btn>
                             <v-btn text @click="etapa = 2"> Voltar </v-btn>
                         </div>
                         
@@ -141,12 +140,26 @@
                     <v-stepper-content step="4">
 
                         <div>
-                            dasdas
-
+                            <div>
+                                <v-chip color="blue" text-color="white" class="JS-bag-confirm-order-item-title">Endereço</v-chip> 
+                                <div class="JS-bag-confirm-order-item-subtitle">{{ address.street }}, {{ address.number }}, {{ address.district }}, {{ address.city }} - {{ address.uf }}</div>
+                            </div>
+                            <div>
+                                <v-chip color="blue" text-color="white" class="JS-bag-confirm-order-item-title">Valor Total</v-chip> 
+                                <div class="JS-bag-confirm-order-item-subtitle">{{ order.amount }}</div>
+                            </div>
+                            <div>
+                                <v-chip color="blue" text-color="white" class="JS-bag-confirm-order-item-title">Método de Pagamento</v-chip> 
+                                <div class="JS-bag-confirm-order-item-subtitle">{{ order.paymentMethod | paymentMethodFilter }}</div>
+                            </div>
+                            <div>
+                                <v-chip color="blue" text-color="white" class="JS-bag-confirm-order-item-title">Troco para</v-chip> 
+                                <div class="JS-bag-confirm-order-item-subtitle">{{ order.changeMoney }}</div>
+                            </div>
                         </div>
 
                         <div class="JS-stepper-buttons">
-                            <v-btn color="primary" ><i class="fa-solid fa-flag"></i> Finalizar Pedido</v-btn>
+                            <v-btn color="primary" :loading="isSendingOrder" @click="sendOrder()"><i class="fa-solid fa-flag"></i> Finalizar Pedido</v-btn>
                             <v-btn text @click="etapa = 3"> Voltar </v-btn>
                         </div>
                         
@@ -155,36 +168,55 @@
             </v-stepper>
             
         </div>
+        <alert-component v-if="alert.isVisible" :message="alert.message" :status="alert.status" @closeAlert="alert.isVisible = false" />
     </div>
 </template>
 
 <script>
 import NavBar from '../../components/user/NavBar.vue'
 import {baseURL} from '../../lib/api'
+import AlertComponent from '../../components/AlertComponent.vue'
+import ModalDeleteProduct from '../../components/user/cart/ModalDeleteProduct.vue'
 import axios from 'axios'
     export default {
         data() {
             return{
                 token: localStorage.getItem('token'),
-                products: [],
-                cartAmount: 0,
                 etapa: 1,
+                isSendingOrder: false,
                 addresses: [
                     
                 ],
                 address: {
                     street: null,
-                    id: null
+                    id: null,
+                    uf: null,
+                    city: null,
+                    district: null,
+                    number: null,
+                    complement: null,
+                    reference: null
                 },
                 needChangeMoney: null,
                 order: {
                     paymentMethod: null,
                     changeMoney: null,
+                    delivery: 0,
+                    products: [],
+                    amount: 0,
+                    storeId: null
+                },
+                alert: {
+                    message: null,
+                    status: null,
+                    isVisible: false
                 }
             }
         },
         components: {
-            NavBar
+            NavBar,
+            AlertComponent,
+            ModalDeleteProduct
         },
         methods: {
             async loadProducts(){
@@ -197,7 +229,7 @@ import axios from 'axios'
 
                     const res = await axios.get(`${baseURL}/userProduct`, req)
 
-                    this.products = res.data;
+                    this.order.products = res.data;
                 }catch(err){
                     console.log(err)
                 }
@@ -218,25 +250,119 @@ import axios from 'axios'
                 }
             },
             async calcAmount(){
-                this.products.forEach(element => {
-                    this.cartAmount += parseFloat(element.amount)
+                this.order.products.forEach(element => {
+                    this.order.amount += parseFloat(element.amount)
                 });
-                const taxa = this.calcTaxaEntrega()
+                const taxa = this.order.delivery;
                 
-                this.cartAmount += taxa;
+                this.order.amount += taxa;
             },
-            calcTaxaEntrega() {
-                return this.products.length > 0 ? parseFloat(this.products[0].product.category.store.delivery) : 0
+            async calcTaxaEntrega() {
+                this.order.delivery =  this.order.products.length > 0 ? parseFloat(this.order.products[0].product.category.store.delivery) : 0
+            },
+            async loadStoreId(){
+                this.order.storeId =  this.order.products.length > 0 ? parseFloat(this.order.products[0].product.category.store.id) : null
             },
             concatenateAddress(address){
                 return `${address.street}, ${address.number}, ${address.district}, ${address.city} - ${address.uf}`
             },
-            submit(){
-                console.log(this.address)
+            async sendOrder(){
+                this.isSendingOrder = true;
+                const request = {...this.order, ...this.address}
+
+                if(request.paymentMethod == 2 || (request.paymentMethod == 1 && this.needChangeMoney == false)){
+                    delete request.changeMoney
+                }
+                if(request.complement == null){
+                    delete request.complement
+                }
+                if(request.reference == null){
+                    delete request.reference
+                }
+
+                request.products.forEach(product => {
+                    if(product.observation == null){
+                        delete product.observation
+                    }
+                    if(product.discount == null){
+                        delete product.discount
+                    }
+                })
+
+                console.log(request);
+
+                try{
+                    setTimeout(async () => {
+                        var req = {
+                            headers: {
+                                Authorization: `Bearer ${this.token}`
+                            }
+                        }
+                        const res = await axios.post(`${baseURL}/order`, request, req)
+                        
+                        this.isSendingOrder = false
+                        this.alert.message = "Pedido enviado ao restaurante"
+                        this.alert.status = 1
+                        this.alert.isVisible = true
+                        
+                        if(res){
+                            await axios.delete(`${baseURL}/userProduct`, req)
+                        }
+
+                        this.$router.push({name: 'user-home'})
+                    }, 2000)
+                    
+                }catch(err){
+                    console.log(err);
+                    this.isSendingOrder = false
+                    this.alert.message = "Houve um erro ao enviar o pedido"
+                    this.alert.status = 0
+                    this.alert.isVisible = true
+                }
+            },
+            dataIsValid(){
+                if(this.order.paymentMethod == 1){
+                    if(this.needChangeMoney == true){
+                        if(this.order.changeMoney >= this.order.amount){
+                            return true
+                        }
+                        return false
+                    }
+                    else if(this.needChangeMoney == false){
+                        return true
+                    }
+                    else{
+                        return false
+                    }
+                }
+                else if(this.order.paymentMethod == 2){
+                    return true
+                }
+                return false
+            }
+        },
+        watch: {
+            needChangeMoney() {
+                this.dataIsValid()
+            },
+            'order.paymentMethod'(){
+                this.dataIsValid()
+            }
+        },
+        filters: {
+            paymentMethodFilter: function(value){
+                if(value == 1){
+                    return "Dinheiro"
+                }
+                else{
+                    return "Cartão"
+                }
             }
         },
         created: async function(){
             await this.loadProducts()
+            await this.loadStoreId()
+            await this.calcTaxaEntrega();
             await this.calcAmount()
             await this.loadAddresses()
         }
@@ -317,23 +443,7 @@ import axios from 'axios'
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
 }
-.table-btn{
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    border-radius: 50%;
-    background-color: #e8e6e6;
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.table-btn i{
-    color: #11101d;
-}
-.table-btn:hover i, .table-btn:focus i{ 
-    color: white;
-}
+
 .JS-stepper-buttons{
     display: flex;
     justify-content: end;
@@ -380,5 +490,11 @@ import axios from 'axios'
 .JS-bag-confirm-paymentMethod-container-options-radio:checked + .JS-bag-confirm-paymentMethod-container-options-item{
     background-color: #11101d;
     color: white;
+}
+.JS-bag-confirm-order-item-title{
+    /* font-weight: bold; */
+}
+.JS-bag-confirm-order-item-subtitle{
+    padding: 5px 10px 15px 10px;
 }
 </style>

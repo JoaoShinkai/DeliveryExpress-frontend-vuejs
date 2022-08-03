@@ -11,6 +11,7 @@ import StoreLoginView from '../views/store/StoreLoginView.vue'
 import StoreProductsView from '../views/store/StoreProductsView.vue'
 import AddressView from '../views/user/AddressView.vue'
 import CartView from '../views/user/CartView.vue'
+import OrdersView from '../views/user/OrdersView.vue'
 import StoreView from '../views/user/StoreView.vue'
 import UserHomeView from '../views/user/UserHomeView.vue'
 
@@ -105,6 +106,14 @@ const routes = [
     path: '/user/address',
     name: 'user-address',
     component: AddressView,
+    beforeEnter: async(to, from, next) => {
+      await validateSession()? next() : next('/login')
+    }
+  },
+  {
+    path: '/user/orders',
+    name: 'user-orders',
+    component: OrdersView,
     beforeEnter: async(to, from, next) => {
       await validateSession()? next() : next('/login')
     }

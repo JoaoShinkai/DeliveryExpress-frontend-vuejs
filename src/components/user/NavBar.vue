@@ -92,10 +92,10 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/user/orders" class="router-link">
+                        <router-link to="/user/orders" class="router-link">
                             <div class="dashboard-nav-icon"><i class="fas fa-scroll"></i></div>
                             <div class="dashboard-nav-text navHidden">Meus pedidos</div>
-                        </a>
+                        </router-link>
                     </li>
                     <li>
                         <router-link to="/user/address" class="router-link">
