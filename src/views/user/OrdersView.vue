@@ -39,8 +39,6 @@ export default {
     methods: {
         async loadOrders() {
             try{
-                
-                
                 const result = await axios.get(`${baseURL}/order`, this.req)
 
                 if(result.data){

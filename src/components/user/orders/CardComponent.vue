@@ -15,13 +15,13 @@
                 {{ order.status | resolveStatus }}
             </div>
             <div class="">
-                <v-chip class="order-card-chip chip-date">
+                <v-chip class="order-card-chip order-card-chip-modified chip-date">
                     <div class="order-card-chip-icon">
                         <i class="fal fa-calendar-alt"></i>
                     </div>
                     <div class="order-card-chip-text">{{ order.date | dateFormat }}</div>
                 </v-chip>
-                <v-chip class="order-card-chip chip-date">
+                <v-chip class="order-card-chip order-card-chip-modified chip-date">
                     <div class="order-card-chip-icon">
                         <i class="fal fa-sack-dollar"></i>
                     </div>
@@ -175,7 +175,8 @@ export default {
     background-color: #e74c3c;
     transform: translateX(100%);
 }
-.order-card-chip{
+.order-card-chip-modified{
+    
     margin: 12px 12px 12px 0;
     color: #2b2b2b !important;
     padding: 0 3px !important;

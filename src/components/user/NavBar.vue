@@ -71,7 +71,7 @@
                         </router-link>
                     </li>
                     <li>
-                        <router-link to="teste" class="router-link">
+                        <router-link to="/user-home" class="router-link">
                             <div class="dashboard-nav-icon"><i class="fas fa-book-open"></i></div>
                             <div class="dashboard-nav-text navHidden">Cardápio</div>
                         </router-link>

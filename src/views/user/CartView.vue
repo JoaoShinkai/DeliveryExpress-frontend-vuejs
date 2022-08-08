@@ -289,8 +289,6 @@ import axios from 'axios'
                     }
                 })
 
-                console.log(request);
-
                 try{
                     setTimeout(async () => {
                         var req = {
@@ -299,11 +297,14 @@ import axios from 'axios'
                             }
                         }
                         const res = await axios.post(`${baseURL}/order`, request, req)
+
                         
                         this.isSendingOrder = false
                         this.alert.message = "Pedido enviado ao restaurante"
                         this.alert.status = 1
                         this.alert.isVisible = true
+
+
                         
                         if(res){
                             await axios.delete(`${baseURL}/userProduct`, req)
