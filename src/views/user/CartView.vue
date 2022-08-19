@@ -268,7 +268,7 @@ import axios from 'axios'
             },
             async sendOrder(){
                 this.isSendingOrder = true;
-                const request = {...this.order, ...this.address}
+                const request = {...this.order, ...this.address, status: {id: 1}}
 
                 if(request.paymentMethod == 2 || (request.paymentMethod == 1 && this.needChangeMoney == false)){
                     delete request.changeMoney

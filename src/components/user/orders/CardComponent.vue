@@ -11,8 +11,8 @@
 
         <v-card-text>
             
-            <div :class="`order-card-status-${order.status}`">
-                {{ order.status | resolveStatus }}
+            <div :class="`order-card-status-${order.status.id}`">
+                {{ order.status.description }}
             </div>
             <div class="">
                 <v-chip class="order-card-chip order-card-chip-modified chip-date">
@@ -102,7 +102,7 @@ export default {
     filters: {
         resolveStatus(value) {
             if(value == 1){
-                return "Pedido enviado ao restaurante"
+                return "Pedido enviado"
             }
             else if(value == 2){
                 return "Em preparo"
@@ -114,7 +114,7 @@ export default {
                 return "Pedido entregue"
             }
             else if(value == 5){
-                return "Pedido rejeitado pelo restaurante"
+                return "Pedido rejeitado"
             }
         },
         hourFormat(date) {
