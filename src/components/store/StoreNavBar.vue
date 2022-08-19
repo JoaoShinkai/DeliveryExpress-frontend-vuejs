@@ -22,6 +22,12 @@
                             <div class="dashboard-nav-text navHidden">Produtos</div>
                         </router-link>
                     </li>
+                    <li>
+                        <router-link to="/store/orders" class="router-link">
+                            <div class="dashboard-nav-icon"><i class="fas fa-scroll-old"></i></div>
+                            <div class="dashboard-nav-text navHidden">Pedidos</div>
+                        </router-link>
+                    </li>
                 </div>
                 <div class="dashboard-nav-divLogout">
                     <div class="navHidden dashboard-nav-divLogout-div">

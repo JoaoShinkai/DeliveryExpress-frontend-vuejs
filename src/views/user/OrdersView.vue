@@ -1,8 +1,16 @@
 <template>
     <div class="user-orders">
         <nav-bar/>
+        
         <div class="user-orders-container">
-            <card-component v-for="order in orders" :key="order.id" :id="order.id" />
+            <div class="user-orders-container-group">
+                <div class="user-orders-container-title">
+                    <div class="user-orders-container-title-text">Últimos pedidos ({{orders.length}})</div>
+                    
+                    <v-divider></v-divider>
+                </div>
+                <card-component v-for="order in orders" :key="order.id" :id="order.id" />
+            </div>
         </div>
     </div>
 </template>
@@ -55,9 +63,21 @@ export default {
 .user-orders-container{
     padding: 45px 5%;
     padding-left: calc(5% + 60px);
+}
+.user-orders-container-group{
     display: grid;
     grid-template-columns: repeat(auto-fill, 374px);
     justify-content: center;
-    grid-gap: 10px;
+    grid-gap: 15px;
+}
+.user-orders-container-title{
+    grid-column-start: 1;
+    grid-column-end: -1;
+    display: flex;
+    align-items: center;
+    color: gray;
+}
+.user-orders-container-title-text{
+    padding: 0 10px;
 }
 </style>

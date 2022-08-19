@@ -1,3 +1,4 @@
+import { baseURL } from '@/lib/api'
 import axios from 'axios'
 import jwt_decode from 'jwt-decode'
 import Vue from 'vue'
@@ -8,9 +9,11 @@ import RegisterView from '../views/RegisterView.vue'
 import StoreEditProduct from '../views/store/StoreEditProduct.vue'
 import StoreHomeView from '../views/store/StoreHomeView.vue'
 import StoreLoginView from '../views/store/StoreLoginView.vue'
+import StoreOrdersView from '../views/store/StoreOrdersView.vue'
 import StoreProductsView from '../views/store/StoreProductsView.vue'
 import AddressView from '../views/user/AddressView.vue'
 import CartView from '../views/user/CartView.vue'
+import OrderDetailsView from '../views/user/OrderDetailsView'
 import OrdersView from '../views/user/OrdersView.vue'
 import StoreView from '../views/user/StoreView.vue'
 import UserHomeView from '../views/user/UserHomeView.vue'
@@ -118,6 +121,32 @@ const routes = [
       await validateSession()? next() : next('/login')
     }
   },
+  {
+    path: '/user/order/:id',
+    name: 'user-order-detail',
+    component: OrderDetailsView,
+    beforeEnter: async(to, from, next) => {
+      await validateSession() == false && next('/login')
+
+      const {id: userId} = jwt_decode(localStorage.getItem('token'));
+
+      const orderId = to.params.id;
+
+      try{
+        const order = await axios.get(`${baseURL}/order/${orderId}`);
+
+        if(order.data.userId != userId){
+          next('/user/orders')
+        }
+
+        next()
+      }catch(err){
+        console.log(err)
+        next('/user/orders')
+      }
+      
+    }
+  },
 
   //Store Views
   {
@@ -165,6 +194,14 @@ const routes = [
           console.log(err);
           next('/store/products')
       }
+    }
+  },
+  {
+    path: '/store/orders',
+    name: 'store-orders',
+    component: StoreOrdersView,
+    beforeEnter: async(to, from, next) => {
+      await validateStoreSession() ? next() : next('/store/login')
     }
   }
 

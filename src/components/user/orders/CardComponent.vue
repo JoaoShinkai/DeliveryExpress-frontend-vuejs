@@ -1,38 +1,53 @@
 <template>
     <v-sheet v-if="loadingData" color="transparent" class="pa-3">
-        <v-skeleton-loader class="mx-auto" max-width="300" type="card"></v-skeleton-loader>
+        <v-skeleton-loader class="mx-auto" type="card"></v-skeleton-loader>
     </v-sheet>
     <v-card v-else max-width="374">
         
         <v-card-title class="orders-card-title">
             <div>{{ order.store.name }}</div>
-            <div><b>#{{ order.id }}</b></div>
+            <div class="orders-card-title-orderId"><b>#{{ order.id }}</b></div>
         </v-card-title>
 
         <v-card-text>
-            <div :class="`order-card-status-${order.status}`">
-                {{ order.status | resolveStatus }}
+            
+            <div :class="`order-card-status-${order.status.id}`">
+                {{ order.status.description }}
+            </div>
+            <div class="">
+                <v-chip class="order-card-chip order-card-chip-modified chip-date">
+                    <div class="order-card-chip-icon">
+                        <i class="fal fa-calendar-alt"></i>
+                    </div>
+                    <div class="order-card-chip-text">{{ order.date | dateFormat }}</div>
+                </v-chip>
+                <v-chip class="order-card-chip order-card-chip-modified chip-date">
+                    <div class="order-card-chip-icon">
+                        <i class="fal fa-sack-dollar"></i>
+                    </div>
+                    <div class="order-card-chip-text">R$ {{ order.amount | moneyFormat }}</div>
+                </v-chip>
             </div>
 
             <v-stepper style="box-shadow: none" alt-labels>
                 <v-stepper-header>
                     <v-stepper-step :complete="order.sent != null" step="1">
                         Enviado
-                        <small>{{order.sent | dateFormat}}</small>
+                        <small>{{order.sent | hourFormat}}</small>
                     </v-stepper-step>
 
                     <v-divider></v-divider>
 
                     <v-stepper-step :complete="order.viewed != null" step="2">
                         Visualizado
-                        <small>{{order.viewed != null ? (order.viewed | dateFormat) : '--:--'}}</small>
+                        <small>{{order.viewed != null ? (order.viewed | hourFormat) : '--:--'}}</small>
                     </v-stepper-step>
 
                     <v-divider></v-divider>
 
                     <v-stepper-step :complete="order.conclusion != null" step="3">
                         Entregue
-                        <small>{{order.conclusion != null ? (order.conclusion | dateFormat) : '--:--'}}</small>
+                        <small>{{order.conclusion != null ? (order.conclusion | hourFormat) : '--:--'}}</small>
                     </v-stepper-step>
                 </v-stepper-header>
             </v-stepper>
@@ -40,22 +55,10 @@
 
         <v-divider class="mx-4"></v-divider>
 
-        <!-- <v-card-title>Tonight's availability</v-card-title>
-
-        <v-card-text>
-            <v-chip-group v-model="selection" active-class="deep-purple accent-4 white--text" column>
-                <v-chip>5:30PM</v-chip>
-
-                <v-chip>7:30PM</v-chip>
-
-                <v-chip>8:00PM</v-chip>
-
-                <v-chip>9:00PM</v-chip>
-            </v-chip-group>
-        </v-card-text> -->
-
-        <v-card-actions>
-            <v-btn color="deep-purple lighten-2" text>Detalhes</v-btn>
+        <v-card-actions style="display: flex; justify-content: end">
+            <router-link class="router-link" :to="{name: 'user-order-detail', params: {id: order.id}}">
+                <v-btn color="deep-purple lighten-2" text>Detalhes</v-btn>
+            </router-link>
         </v-card-actions>
     </v-card>
 </template>
@@ -90,6 +93,7 @@ export default {
                     this.order = res.data
                     this.loadingData = false
                 }
+                
             }catch(err){
                 console.log(err)
             }
@@ -98,7 +102,7 @@ export default {
     filters: {
         resolveStatus(value) {
             if(value == 1){
-                return "Pedido enviado ao restaurante"
+                return "Pedido enviado"
             }
             else if(value == 2){
                 return "Em preparo"
@@ -110,12 +114,18 @@ export default {
                 return "Pedido entregue"
             }
             else if(value == 5){
-                return "Pedido rejeitado pelo restaurante"
+                return "Pedido rejeitado"
             }
         },
-        dateFormat(date) {
+        hourFormat(date) {
             return format(Date.parse(date), 'HH:mm')
-        }
+        },
+        dateFormat(date) {
+            return format(Date.parse(date), 'dd/MM/yyyy')
+        },
+        moneyFormat(value){
+            return parseFloat(value).toFixed(2).replace(".",",")
+        },
     },
     created: async function(){
         await this.loadOrder()
@@ -147,5 +157,46 @@ export default {
 .order-card-status-5{
     color: crimson;
     font-size: 16px;
+}
+.orders-card-title-orderId{
+    background-color: #e74c3c;
+    color: white;
+    padding: 0 10px;
+    border-radius: 15px 0 0 15px;
+    position: relative;
+}
+.orders-card-title-orderId::before{
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 16px;
+    height: 100%;
+    background-color: #e74c3c;
+    transform: translateX(100%);
+}
+.order-card-chip-modified{
+    
+    margin: 12px 12px 12px 0;
+    color: #2b2b2b !important;
+    padding: 0 3px !important;
+}
+.chip-date{
+    background-color: #e9e9e9 !important;
+}
+.chip-price{
+    background-color: #e9e9e9 !important;
+}
+.order-card-chip-icon{
+    background-color: white;
+    border-radius: 50%;
+    height: 26px;
+    width: 26px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.order-card-chip-text{
+    padding: 0 6px;
 }
 </style>

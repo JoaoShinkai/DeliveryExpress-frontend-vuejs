@@ -47,8 +47,8 @@
                                 <tr class="JS-bag-table-product" :key="'header'+product.id">
                                     <td>{{ product.product.name }}</td>
                                     <td style="text-align: center;"> {{ product.quantity }}</td>
-                                    <td style="text-align: center;">R$ {{ product.unityPrice }}</td>
-                                    <td style="text-align: center;">R$ {{ product.amount }}</td>
+                                    <td style="text-align: center;">R$ {{ product.unityPrice | convertMoney }}</td>
+                                    <td style="text-align: center;">R$ {{ product.amount | convertMoney }}</td>
                                     <td class="d-flex justify-center"> <modal-delete-product :idProduct="product.id" :nameProduct="product.product.name"/> </td>
                                     <td> <button class="btn btn-warning table-btn"><i class="fas fa-pencil-alt table-btn-pencil"></i></button> </td>
                                 </tr>
@@ -62,12 +62,12 @@
                                 </template>
                                 <tr class="JS-bag-table-delivery" >
                                 <td colspan="3"><i class="fas fa-motorcycle"></i>Taxa de entrega</td>
-                                <td style="text-align: center;"> R$ {{this.order.delivery}}</td>
+                                <td style="text-align: center;"> R$ {{this.order.delivery | convertMoney}}</td>
                                 <td colspan="2"></td>
                                 </tr>
                                 <tr class="JS-bag-table-subtotal" >
                                 <td colspan="3"><b><i class="fas fa-coins"></i> Subtotal</b></td>
-                                <td style="text-align: center;"> <b>R$ {{ order.amount }}</b> </td>
+                                <td style="text-align: center;"> <b>R$ {{ order.amount | convertMoney }}</b> </td>
                                 </tr>
                                 
                             </tbody>
@@ -139,22 +139,22 @@
 
                     <v-stepper-content step="4">
 
-                        <div>
-                            <div>
-                                <v-chip color="blue" text-color="white" class="JS-bag-confirm-order-item-title">Endereço</v-chip> 
+                        <div class="JS-bag-confirm-order-group">
+                            <div class="JS-bag-confirm-order-item">
+                                <v-chip color="blue" text-color="white" class="JS-bag-confirm-order-item-title"><i class="fad fa-map-marker-alt"></i> Endereço</v-chip> 
                                 <div class="JS-bag-confirm-order-item-subtitle">{{ address.street }}, {{ address.number }}, {{ address.district }}, {{ address.city }} - {{ address.uf }}</div>
                             </div>
-                            <div>
-                                <v-chip color="blue" text-color="white" class="JS-bag-confirm-order-item-title">Valor Total</v-chip> 
-                                <div class="JS-bag-confirm-order-item-subtitle">{{ order.amount }}</div>
+                            <div class="JS-bag-confirm-order-item">
+                                <v-chip color="blue" text-color="white" class="JS-bag-confirm-order-item-title"><i class="fad fa-coins"></i>    Valor Total</v-chip> 
+                                <div class="JS-bag-confirm-order-item-subtitle">R$ {{ order.amount | convertMoney }}</div>
                             </div>
-                            <div>
-                                <v-chip color="blue" text-color="white" class="JS-bag-confirm-order-item-title">Método de Pagamento</v-chip> 
+                            <div class="JS-bag-confirm-order-item">
+                                <v-chip color="blue" text-color="white" class="JS-bag-confirm-order-item-title"><i class="fad fa-credit-card"></i> Método de Pagamento</v-chip> 
                                 <div class="JS-bag-confirm-order-item-subtitle">{{ order.paymentMethod | paymentMethodFilter }}</div>
                             </div>
-                            <div>
-                                <v-chip color="blue" text-color="white" class="JS-bag-confirm-order-item-title">Troco para</v-chip> 
-                                <div class="JS-bag-confirm-order-item-subtitle">{{ order.changeMoney }}</div>
+                            <div class="JS-bag-confirm-order-item">
+                                <v-chip color="blue" text-color="white" class="JS-bag-confirm-order-item-title"><i class="fad fa-coin"></i> Troco para</v-chip> 
+                                <div class="JS-bag-confirm-order-item-subtitle">{{ order.changeMoney | changeMoneyFilter }}</div>
                             </div>
                         </div>
 
@@ -268,7 +268,7 @@ import axios from 'axios'
             },
             async sendOrder(){
                 this.isSendingOrder = true;
-                const request = {...this.order, ...this.address}
+                const request = {...this.order, ...this.address, status: {id: 1}}
 
                 if(request.paymentMethod == 2 || (request.paymentMethod == 1 && this.needChangeMoney == false)){
                     delete request.changeMoney
@@ -289,8 +289,6 @@ import axios from 'axios'
                     }
                 })
 
-                console.log(request);
-
                 try{
                     setTimeout(async () => {
                         var req = {
@@ -299,11 +297,14 @@ import axios from 'axios'
                             }
                         }
                         const res = await axios.post(`${baseURL}/order`, request, req)
+
                         
                         this.isSendingOrder = false
                         this.alert.message = "Pedido enviado ao restaurante"
                         this.alert.status = 1
                         this.alert.isVisible = true
+
+
                         
                         if(res){
                             await axios.delete(`${baseURL}/userProduct`, req)
@@ -356,6 +357,17 @@ import axios from 'axios'
                 }
                 else{
                     return "Cartão"
+                }
+            },
+            convertMoney: function(value){
+                return parseFloat(value).toFixed(2).replace(".",",")
+            },
+            changeMoneyFilter: function(value){
+                if(value){
+                    return parseFloat(value).toFixed(2).replace(".",",")
+                }
+                else{
+                    return "Não preciso de troco"
                 }
             }
         },
@@ -491,8 +503,23 @@ import axios from 'axios'
     background-color: #11101d;
     color: white;
 }
+.JS-bag-confirm-order-group{
+    padding: 8px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
+}
+.JS-bag-confirm-order-item{
+    background-color: #f6f6f6;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 8px 0;
+    /* box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%); */
+}
 .JS-bag-confirm-order-item-title{
-    /* font-weight: bold; */
+}
+.JS-bag-confirm-order-item-title i{
+    margin-right: 6px;
 }
 .JS-bag-confirm-order-item-subtitle{
     padding: 5px 10px 15px 10px;
