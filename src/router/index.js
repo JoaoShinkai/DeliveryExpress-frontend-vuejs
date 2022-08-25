@@ -9,6 +9,7 @@ import RegisterView from '../views/RegisterView.vue'
 import StoreEditProduct from '../views/store/StoreEditProduct.vue'
 import StoreHomeView from '../views/store/StoreHomeView.vue'
 import StoreLoginView from '../views/store/StoreLoginView.vue'
+import StoreOrderDetails from '../views/store/StoreOrderDetails.vue'
 import StoreOrdersView from '../views/store/StoreOrdersView.vue'
 import StoreProductsView from '../views/store/StoreProductsView.vue'
 import AddressView from '../views/user/AddressView.vue'
@@ -202,6 +203,25 @@ const routes = [
     component: StoreOrdersView,
     beforeEnter: async(to, from, next) => {
       await validateStoreSession() ? next() : next('/store/login')
+    }
+  },
+  {
+    path: '/store/order/:id',
+    name: 'store-order-detail',
+    component: StoreOrderDetails,
+    beforeEnter: async(to, from, next) => {
+      await validateStoreSession() == false && next("/store/login")
+
+      const decodedToken = jwt_decode(localStorage.getItem('token'));
+      const orderId = to.params.id;
+
+      const order = await axios.get(`${baseURL}/order/${orderId}`);
+
+      if(order.data.store.id != decodedToken.id){
+        next("/store/orders")
+      }
+
+      next();
     }
   }
 

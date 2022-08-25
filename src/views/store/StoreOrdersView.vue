@@ -7,21 +7,21 @@
                     <div class="store-orders-container-group-title-text">Aguardando aprovação</div> 
                     <v-divider></v-divider> 
                 </div>
-                <card-component v-for="order in ordersSent" :key="order.id" :id="order.id" />
+                <card-component v-for="order in ordersSent" :key="order.id" :id="order.id" @orderUpdated="loadOrders()" />
             </div>
             <div class="store-orders-container-group">
                 <div class="store-orders-container-group-title"> 
                     <div class="store-orders-container-group-title-text">Em preparo</div> 
                     <v-divider></v-divider> 
                 </div>
-                <card-component v-for="order in ordersPrepare" :key="order.id" :id="order.id" />
+                <card-component v-for="order in ordersPrepare" :key="order.id" :id="order.id" @orderUpdated="loadOrders()"  />
             </div>
             <div class="store-orders-container-group">
                 <div class="store-orders-container-group-title"> 
                     <div class="store-orders-container-group-title-text">Em entrega</div> 
                     <v-divider></v-divider> 
                 </div>
-                <card-component v-for="order in ordersDelivery" :key="order.id" :id="order.id" />
+                <card-component v-for="order in ordersDelivery" :key="order.id" :id="order.id" @orderUpdated="loadOrders()"  />
             </div>
             <div class="store-orders-container-group">
                 <div class="store-orders-container-group-title"> 
@@ -90,7 +90,7 @@ export default {
         }
     },
     created: async function(){
-        this.loadOrders()
+        await this.loadOrders()
     }
 }
 </script>
