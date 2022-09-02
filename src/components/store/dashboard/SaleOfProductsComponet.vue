@@ -1,7 +1,6 @@
 <template>
     <div class="chart-container">
         <v-chart class="chart" :option="option"/>
-        
     </div>
 </template>
 
