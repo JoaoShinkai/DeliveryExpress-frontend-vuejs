@@ -16,11 +16,7 @@
                 <v-list-item @click="() => this.modalEditCategory = true" class="nav-link-text">
                     <v-list-item-title class="navbar-link-option"><i class="fa-solid fa-pen-ruler"></i> Editar</v-list-item-title>
                 </v-list-item>
-                <router-link to="/register" class="nav-link">
-                    <v-list-item class="nav-link-text">
-                        <v-list-item-title class="navbar-link-option"><i class="fa-solid fa-trash-can"></i> Excluir</v-list-item-title>
-                    </v-list-item>
-                </router-link>
+                <modal-delete-category :id="this.id" :name="this.name" @deletedCategory="deletedCategory()"/>
             </v-list>
         </v-menu>
         </div>
@@ -38,6 +34,7 @@
 </template>
 
 <script>
+import ModalDeleteCategory from '../../components/store/ModalDeleteCategory.vue'
 
 export default {
     name: 'StoreCardProduct',
@@ -53,7 +50,13 @@ export default {
     methods: {
         emitEvent: function(){
             this.$emit("emitCategory", this.id, this.name);
+        },
+        deletedCategory(){
+            this.$emit("deletedCategory");
         }
+    },
+    components: {
+        ModalDeleteCategory
     }
 }
 </script>

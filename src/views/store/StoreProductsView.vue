@@ -61,6 +61,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="modal-create-category-msgError">{{this.modalCreateCategory.msgError}}</div>
                             </form>
                         </v-card-text>
                         <v-card-actions>
@@ -79,7 +80,7 @@
             </div>
             <!-- Exibição de categorias -->
             <div class="store-products-container-categories">
-                <store-card-product v-for="category in categories" :key="category.id" :id="category.id" :name="category.name" :icon="category.icon"  @emitCategory="loadProducts" />
+                <store-card-product v-for="category in categories" :key="category.id" :id="category.id" :name="category.name" :icon="category.icon"  @emitCategory="loadProducts" @deletedCategory="loadCategories()" />
             </div>
             <hr>
 
@@ -167,7 +168,8 @@ export default {
             categories: [],
             modalCreateCategory: {
                 name: '',
-                icon: ''
+                icon: '',
+                msgError: ''
             },
             dataTable: {
                 categorySelected: '',
@@ -218,18 +220,26 @@ export default {
         async createCategory(){
             const { id: storeId } = jwt_decode(this.token);
 
-            const data = {
-                name: this.modalCreateCategory.name,
-                icon: this.modalCreateCategory.icon,
-                storeId
+            if(this.modalCreateCategory.name == '' || this.modalCreateCategory.icon == '' ){
+                this.modalCreateCategory.msgError = "* Todos os campos devem estar preenchidos";
             }
-            try{
-                await axios.post(`http://localhost:3000/category`, data);
-                this.dialog = false;
-                this.loadCategories();
-            }catch(err){
-                console.log(err);
+            else{
+                this.modalCreateCategory.msgError = "";
+                const data = {
+                    name: this.modalCreateCategory.name,
+                    icon: this.modalCreateCategory.icon,
+                    storeId
+                }
+                try{
+                    await axios.post(`http://localhost:3000/category`, data);
+                    this.dialog = false;
+                    this.loadCategories();
+                }catch(err){
+                    console.log(err);
+                }
             }
+
+            
         },
 
         async loadProducts(id, name){
@@ -295,6 +305,7 @@ hr{
 }
 .store-products-container-categories{
     display: flex;
+    flex-wrap: wrap;
 }
 .store-products-container-header{
     padding: 8px 0;
@@ -340,6 +351,11 @@ hr{
 .JS-category-new-icon-item-radio:checked ~ .JS-category-new-icon-item-label{
     background-color: dodgerblue;
     color: white;
+}
+
+.modal-create-category-msgError{
+    color: crimson;
+    padding: 8px 0;
 }
 
 
